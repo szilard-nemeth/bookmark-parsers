@@ -25,11 +25,12 @@ class Collector:
         for item in self.collectorSet:
             file.write("%s\n" % item)
 
-        #write separate result files if required
-        for filename, urls in self.dict_of_items_by_file.items():
-            file = open(os.path.join(self.dest_dir, filename + '_extracted_urls'), 'w')
-            for url in urls:
-                file.write("%s\n" % url)
+        if self.write_separate_result_files:
+            #write separate result files if required
+            for filename, urls in self.dict_of_items_by_file.items():
+                file = open(os.path.join(self.dest_dir, filename + '_extracted_urls'), 'w')
+                for url in urls:
+                    file.write("%s\n" % url)
 
     def collect_links(self, baseFileToDiff=None):
         self.collectorSet = set()
