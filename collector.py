@@ -12,38 +12,41 @@ class Collector:
         self.write_separate_result_files = write_separate_result_files
         assert self.parser.extension
 
-
     def collect_all(self):
         self.collect_links()
 
-    def make_diff(self, baseFileToDiff):
-        self.collect_links(baseFileToDiff)
-        self.compare_with_file(baseFileToDiff)
+    def make_diff(self, base_file_to_diff):
+        self.collect_links(base_file_to_diff)
+        self.compare_with_file(base_file_to_diff)
 
     def create_result_file(self):
-        file = open(os.path.join(self.dest_dir, 'summary.txt'), 'w')
-        for item in self.collectorSet:
-            file.write("%s\n" % item)
+        filename = os.path.join(self.dest_dir, 'summary.txt')
+        if not os.path.exists(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
 
-        if self.write_separate_result_files:
-            #write separate result files if required
-            for filename, urls in self.dict_of_items_by_file.items():
-                file = open(os.path.join(self.dest_dir, filename + '_extracted_urls'), 'w')
-                for url in urls:
-                    file.write("%s\n" % url)
+        with open(filename, "w", encoding='utf-8') as file:
+            for item in self.collectorSet:
+                file.write("%s\n" % item)
 
-    def collect_links(self, baseFileToDiff=None):
+            if self.write_separate_result_files:
+                # write separate result files if required
+                for filename, urls in self.dict_of_items_by_file.items():
+                    file = open(os.path.join(self.dest_dir, filename + '_extracted_urls.txt'), 'w')
+                    for url in urls:
+                        file.write("%s\n" % url)
+
+    def collect_links(self, base_file_to_diff=None):
         self.collectorSet = set()
         self.dict_of_items_by_file = {}
         for file in os.listdir(self.src_dir):
             if file.endswith(self.parser.extension):
-                if baseFileToDiff is not None and os.path.samefile(os.path.join(self.src_dir, file), baseFileToDiff):
+                if base_file_to_diff is not None and os.path.samefile(os.path.join(self.src_dir, file),
+                                                                      base_file_to_diff):
                     continue
                 parser = self.parser()
-                enc = 'iso-8859-15'
-                openedFile = open(os.path.join(self.src_dir, file), encoding=enc)
+                file_obj = open(os.path.join(self.src_dir, file), encoding='utf-8')
                 print('Processing file: ' + file)
-                parser.parse(openedFile)
+                parser.parse(file_obj)
                 print("Found " + str(len(parser.collection)) + " elements in " + file)
 
                 self.dict_of_items_by_file[file] = parser.collection
@@ -54,12 +57,12 @@ class Collector:
 
         print('Found ' + str(len(self.collectorSet)) + " unique elements in the files above")
 
-    def compare_with_file(self, baseFileToDiff):
-        parser = self.parser(baseFileToDiff, set())
-        parser.feed(open(baseFileToDiff).read())
+    def compare_with_file(self, base_file_to_diff):
+        parser = self.parser(base_file_to_diff, set())
+        parser.feed(open(base_file_to_diff).read())
         parser.close()
 
-        print('Found ' + str(len(parser.mySet)) + " unique elements in " + baseFileToDiff)
+        print('Found ' + str(len(parser.mySet)) + " unique elements in " + base_file_to_diff)
 
         pp = pprint.PrettyPrinter(indent=2)
         pp.pprint(parser.mySet.difference(self.collectorSet))
@@ -74,7 +77,7 @@ def check_file(file):
     return file
 
 
-def setupParser(file_type):
+def setup_parser(file_type):
     parser = argparse.ArgumentParser(description='Extract links from ' + file_type)
     parser.add_argument('--srcdir', type=check_file, required=True,
                         help='a folder where search for ' + file_type + 's takes place')
@@ -93,8 +96,8 @@ def create_args_dict(arg_parser):
     args = arg_parser.parse_args()
     print(args)
 
-    argsDict = vars(args)
-    # #deletes null keys
-    argsDict = dict((k, v) for k, v in argsDict.items() if v)
-    print("args dict: " + str(argsDict))
-    return argsDict
+    args_dict = vars(args)
+    #deletes null keys
+    args_dict = dict((k, v) for k, v in args_dict.items() if v)
+    print("args dict: " + str(args_dict))
+    return args_dict

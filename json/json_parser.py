@@ -39,7 +39,7 @@ class JsonParser():
 
 
 if __name__ == "__main__":
-    arg_parser = collector.setupParser('json')
+    arg_parser = collector.setup_parser('json')
     argsDict = collector.create_args_dict(arg_parser)
     collector = collector.Collector(JsonParser, argsDict['srcdir'], argsDict['destdir'],
                                     argsDict['write_separate_result_files'])

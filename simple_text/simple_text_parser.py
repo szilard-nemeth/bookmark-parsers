@@ -38,7 +38,7 @@ class SimpleTextParser():
 
 
 if __name__ == "__main__":
-    arg_parser = collector.setupParser('txt')
+    arg_parser = collector.setup_parser('txt')
     argsDict = collector.create_args_dict(arg_parser)
     collector = collector.Collector(SimpleTextParser, argsDict['srcdir'], argsDict['destdir'],
                                     argsDict.get('write_separate_result_files'))
